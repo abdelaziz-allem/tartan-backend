@@ -1,0 +1,12 @@
+import { Module } from '@nestjs/common';
+import { UserService } from './user.service';
+import { UsersController } from './user.controller';
+import { JwtModule } from '@nestjs/jwt';
+
+@Module({
+  imports: [JwtModule],
+  providers: [UserService],
+  controllers: [UsersController],
+  exports: [UserService],
+})
+export class UserModule {}

@@ -1,0 +1,350 @@
+import { PrismaClient, Role, Gender } from '@prisma/client';
+
+const prisma = new PrismaClient();
+
+async function main() {
+  const tenantId = 'e9eccf36-caf2-462b-8dd8-0b691d745c3a';
+
+  const users = [
+    {
+      name: 'Alice Njoki Ngigi',
+      phone: '637774162',
+      date: '2024-07-29',
+      role: 'Teacher',
+      email: 'njoki8026@gmail.com',
+      gender: Gender.Female,
+    },
+    {
+      name: 'Asia Hussein Daud',
+      phone: '634280611',
+      date: '2023-09-09',
+      role: 'Admin',
+      email: 'asia59954@gmail.com',
+      gender: Gender.Female,
+    },
+    {
+      name: 'Asma Bashe Abdirahman',
+      phone: '636128400',
+      date: '2024-08-01',
+      role: 'Admin',
+      email: 'asmapashaupdi@gmail.com',
+      gender: Gender.Female,
+    },
+    {
+      name: 'Daniel Koech',
+      phone: '639004421',
+      date: '2025-07-31',
+      role: 'Teacher',
+      email: 'dankoech1992@gmail.com',
+      gender: Gender.Male,
+    },
+    {
+      name: 'David Kiprotich Kipsir',
+      phone: '638248031',
+      date: '2024-02-18',
+      role: 'Teacher',
+      email: 'kipsirdavid@gmail.com',
+      gender: Gender.Male,
+    },
+    {
+      name: 'Elizabeth Jemutai Biwott',
+      phone: '633234716',
+      date: '2020-08-01',
+      role: 'Teacher',
+      email: 'ludydeally31@gmail.com',
+      gender: Gender.Female,
+    },
+    {
+      name: 'Emily Kasichana Kennedy',
+      phone: '633545224',
+      date: '2020-08-01',
+      role: 'Teacher',
+      email: 'emilykasichana@gmail.com',
+      gender: Gender.Female,
+    },
+    {
+      name: 'Fahima Saed Abdikadir',
+      phone: '634268640',
+      date: '2020-08-01',
+      role: 'Teacher',
+      email: 'fahiimasaed122@gmail.com',
+      gender: Gender.Female,
+    },
+    {
+      name: 'Faisal Abdillahi Mohamed',
+      phone: '634000999',
+      date: '2020-08-01',
+      role: 'Admin',
+      email: 'faisaldhimbil@gmail.com',
+      gender: Gender.Male,
+    },
+    {
+      name: 'Faith Kathini Mutua',
+      phone: '638644327',
+      date: '2024-10-05',
+      role: 'Teacher',
+      email: 'kathinifaith2@gmail.com',
+      gender: Gender.Female,
+    },
+    {
+      name: 'Fathia Ali Mohamoud',
+      phone: '633815869',
+      date: '2020-09-07',
+      role: 'Teacher',
+      email: 'fathia06381@gmail.com',
+      gender: Gender.Female,
+    },
+    {
+      name: 'Ghanima Osman Abdi',
+      phone: '633930132',
+      date: '2023-08-02',
+      role: 'Teacher',
+      email: 'ghanimah.othman@gmail.com',
+      gender: Gender.Female,
+    },
+    {
+      name: 'Gideon Onyango Ochieng',
+      phone: '639004355',
+      date: '2025-07-27',
+      role: 'Teacher',
+      email: 'gidionochi@gmail.com',
+      gender: Gender.Male,
+    },
+    {
+      name: 'Hanan Ahmed Mohamed',
+      phone: '638946345',
+      date: '2025-07-27',
+      role: 'Admin',
+      email: 'hanan.ahmed.koshan@gmail.com',
+      gender: Gender.Female,
+    },
+    {
+      name: 'Hiba Adam Abdallah',
+      phone: '638143437',
+      date: '2022-11-12',
+      role: 'Teacher',
+      email: 'hibaaadam@hotmail.com',
+      gender: Gender.Female,
+    },
+    {
+      name: 'Hibak Abdirasak Jama',
+      phone: '633517259',
+      date: '2025-07-28',
+      role: 'Teacher',
+      email: 'hibaaqabdirisaaq5@gmail.com',
+      gender: Gender.Female,
+    },
+    {
+      name: 'Hinda Abdi Abdillahi',
+      phone: '634232271',
+      date: '2020-08-01',
+      role: 'Admin',
+      email: 'hindaabdiabdillahi24@gmail.com',
+      gender: Gender.Female,
+    },
+    {
+      name: 'Huda Hashi Abdillahi',
+      phone: '636298579',
+      date: '2023-10-01',
+      role: 'Teacher',
+      email: 'hudahashi16@gmail.com',
+      gender: Gender.Female,
+    },
+    {
+      name: 'Kawnin Saeed Elmi',
+      phone: '634404044',
+      date: '2020-08-01',
+      role: 'Admin',
+      email: 'kawniin2016@gmail.com',
+      gender: Gender.Male,
+    },
+    {
+      name: 'Kelvin Kipkorir Kimutai',
+      phone: '639005632',
+      date: '2025-07-28',
+      role: 'Teacher',
+      email: 'kelvinkipkorir76@gmail.com',
+      gender: Gender.Male,
+    },
+    {
+      name: 'Khadar Mowlid Ahmed',
+      phone: '634252902',
+      date: '2025-07-27',
+      role: 'Teacher',
+      email: 'khadar42may@gmail.com',
+      gender: Gender.Male,
+    },
+    {
+      name: 'Lilian Adhiambo Abade',
+      phone: '638697743',
+      date: '2025-02-01',
+      role: 'Teacher',
+      email: 'lilianadhiambo150@gmail.com',
+      gender: Gender.Female,
+    },
+    {
+      name: 'Lydiah Akinyi Mayienga',
+      phone: '637401265',
+      date: '2023-08-06',
+      role: 'Teacher',
+      email: 'akinyilydia36@gmail.com',
+      gender: Gender.Female,
+    },
+    {
+      name: 'Mary Muthoni Thuku',
+      phone: '636677250',
+      date: '2020-08-01',
+      role: 'Teacher',
+      email: 'marythuku0100@gmail.com',
+      gender: Gender.Female,
+    },
+    {
+      name: 'Mohamed-Khadar Abib Farah',
+      phone: '634672542',
+      date: '2022-01-01',
+      role: 'Teacher',
+      email: 'abiib898@gmail.com',
+      gender: Gender.Male,
+    },
+    {
+      name: 'Mona Ahmed Baroud',
+      phone: '634617090',
+      date: '2020-08-01',
+      role: 'Teacher',
+      email: 'monabaroud144@gmail.com',
+      gender: Gender.Female,
+    },
+    {
+      name: 'Moses Odhiambo Auma',
+      phone: '633237661',
+      date: '2020-08-01',
+      role: 'Teacher',
+      email: 'aumamoses@gmail.com',
+      gender: Gender.Male,
+    },
+    {
+      name: 'Najma Mohamed Osman',
+      phone: '633684970',
+      date: '2021-06-01',
+      role: 'Teacher',
+      email: 'najma.cismaan22@gmail.com',
+      gender: Gender.Female,
+    },
+    {
+      name: 'Nasteexo Faisal Ahmed',
+      phone: '633283319',
+      date: '2025-02-23',
+      role: 'Admin',
+      email: 'nastehofaizal12@gmail.com',
+      gender: Gender.Female,
+    },
+    {
+      name: 'Nimo Mawlid Ahmed',
+      phone: '633519005',
+      date: '2023-03-05',
+      role: 'Teacher',
+      email: 'nimcomawliid33@gmail.com',
+      gender: Gender.Female,
+    },
+    {
+      name: 'Nuru Amukoya',
+      phone: '633139725',
+      date: '2021-01-06',
+      role: 'Teacher',
+      email: 'nuruamukoya@gmail.com',
+      gender: Gender.Female,
+    },
+    {
+      name: 'Philis Nyansiaboka Nyamweya',
+      phone: '638981484',
+      date: '2025-08-03',
+      role: 'Teacher',
+      email: 'philisnyamweya@gmail.com',
+      gender: Gender.Female,
+    },
+    {
+      name: 'Rosebella Agutu Ochieng',
+      phone: '638740665',
+      date: '2025-01-25',
+      role: 'Teacher',
+      email: 'rosebellaagutu98@gmail.com',
+      gender: Gender.Female,
+    },
+    {
+      name: 'Safa Abdi Ismail',
+      phone: '634087475',
+      date: '2021-09-18',
+      role: 'Admin',
+      email: 'safo1444@gmail.com',
+      gender: Gender.Female,
+    },
+    {
+      name: 'Safiya Suleiman Mohamoud',
+      phone: '634480189',
+      date: '2021-01-31',
+      role: 'Teacher',
+      email: 'safiyashankaroon123@gmail.com',
+      gender: Gender.Female,
+    },
+    {
+      name: 'Selpha Mbayaji',
+      phone: '637361726',
+      date: '2025-04-15',
+      role: 'Teacher',
+      email: 'sellykwendo0@gmail.com',
+      gender: Gender.Female,
+    },
+    {
+      name: 'Shafici Yusuf Mohmoud',
+      phone: '636161982',
+      date: '2025-02-15',
+      role: 'Teacher',
+      email: 'abwaanaragsame@gmail.com',
+      gender: Gender.Male,
+    },
+    {
+      name: 'Zamzam Abdillahi Mohamed',
+      phone: '634108000',
+      date: '2020-08-01',
+      role: 'Admin',
+      email: 'zamzam.abdillahim@gmail.com',
+      gender: Gender.Female,
+    },
+  ];
+
+  for (const u of users) {
+    const user = await prisma.user.create({
+      data: {
+        name: u.name,
+        email: u.email,
+        mobileNumber: u.phone,
+        gender: u.gender,
+        password:
+          '$2a$10$WHxKt0EdeftvM/WZaJHAKuS97pNIzera7107SghOeOfwmPt0/EpaK',
+        createdAt: new Date(u.date),
+      },
+    });
+
+    await prisma.userTenant.create({
+      data: {
+        userId: user.id,
+        tenantId,
+        role: u.role === 'Teacher' ? Role.Teacher : Role.Admin,
+        salary: 0,
+      },
+    });
+
+    console.log(`✅ Created ${u.name} (${u.role}, ${u.gender})`);
+  }
+
+  console.log('✅ Seeding completed!');
+}
+
+main()
+  .catch((e) => {
+    console.error('❌ Error seeding data:', e);
+    process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
+  });

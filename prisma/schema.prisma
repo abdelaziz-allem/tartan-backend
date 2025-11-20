@@ -1,0 +1,127 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(uuid())
+  name         String
+  email        String?  @unique @db.VarChar(255)
+  avatar String?
+  createdAt    DateTime @default(now())
+  role Role
+  games              Game[]
+  notifications notification[]
+
+  @@index([id])
+  @@map("user")
+}
+
+model notification {
+  id        String   @id @default(cuid())
+  userId    String
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+
+
+
+
+model Category {
+  id        String   @id @default(uuid())
+  name      String
+  imageUrl String
+  createdAt DateTime @default(now())
+  // Relations
+  questions Question[]
+  gameQuestions GameQuestion[]
+  @@map("category")
+}
+
+
+model Question {
+  id        String   @id @default(uuid())
+  categoryId String
+  fileUrl String?
+  fileType String?
+  answerFileUrl String?
+  answerFileType String?
+  text      String @db.Text
+  answer      String @db.Text
+  points       Int @default(200)
+  createdAt DateTime @default(now())
+  // Relations
+  category Category @relation(fields: [categoryId], references: [id])
+  gameQuestions GameQuestion[]
+  @@map("question")
+}
+
+
+model Game {
+  id        String     @id @default(cuid())
+  userId    String
+  name      String
+  isFinished Boolean @default(false)
+  currentTurn String?
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  teams        Team[]
+  gameQuestions GameQuestion[]
+  user User @relation(fields: [userId], references: [id])
+  @@map("game")
+}
+
+
+
+model Team {
+  id        String   @id @default(cuid())
+  gameId    String
+  name      String
+  score     Int      @default(0)
+  color     String 
+  position  Int      
+  game      Game     @relation(fields: [gameId], references: [id])
+  createdAt DateTime @default(now())
+  answers   GameQuestion[] @relation("TeamAnswers")
+  @@map("team")
+}
+
+
+
+model GameQuestion {
+  id          String   @id @default(cuid())
+  gameId      String
+  categoryId  String
+  questionId  String
+  points      Int
+
+  // gameplay state
+  isActive    Boolean  @default(true)
+  answeredBy  String?  // teamId
+  answeredAt  DateTime?
+
+  game        Game      @relation(fields: [gameId], references: [id])
+  category    Category  @relation(fields: [categoryId], references: [id])
+  question    Question  @relation(fields: [questionId], references: [id])
+  team        Team?     @relation("TeamAnswers", fields: [answeredBy], references: [id])
+  @@map("game_question")
+}
+
+
+
+
+enum Role {
+  Admin
+  User
+
+}
+
