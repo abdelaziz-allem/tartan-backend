@@ -26,17 +26,31 @@ function getFlagType(code: string): string {
   return 'country';
 }
 
-async function main() {
-  const categoryId = 'bbc41ba6-6277-44f8-be95-05bae4f683e1';
+const FLAGS_CATEGORY_ID = 'bbc41ba6-6277-44f8-be95-05bae4f683e1';
 
-  await prisma.question.deleteMany({ where: { categoryId } });
-  console.log('🗑️  Cleared existing questions for category');
+const DIFFICULTIES = [
+  { points: 200, label: 'Easy' },
+  { points: 400, label: 'Medium' },
+  { points: 600, label: 'Hard' },
+];
+
+const QUESTIONS_PER_DIFFICULTY = 3;
+
+async function seedFlags() {
+  const flagsCategory = await prisma.category.findUnique({ where: { id: FLAGS_CATEGORY_ID } });
+  if (!flagsCategory) {
+    console.log('⏭️  Flags category not found in DB — skipping');
+    return;
+  }
+
+  await prisma.question.deleteMany({ where: { categoryId: FLAGS_CATEGORY_ID } });
+  console.log('🗑️  Cleared existing questions for Flags category');
 
   for (const country of countries) {
     const flagType = getFlagType(country.code);
     await prisma.question.create({
       data: {
-        categoryId,
+        categoryId: FLAGS_CATEGORY_ID,
         text: `Name this ${flagType}`,
         fileUrl: country.photo,
         fileType: 'image',
@@ -46,10 +60,47 @@ async function main() {
         points: country.points,
       },
     });
-    console.log(`✅ Created question for ${country.name} (${flagType})`);
+    console.log(`✅ Flags: ${country.name} (${flagType})`);
   }
+}
 
-  console.log('✅ Seeding completed!');
+async function seedAllCategories() {
+  const categories = await prisma.category.findMany({
+    where: { id: { not: FLAGS_CATEGORY_ID } },
+  });
+
+  console.log(`\n📂 Found ${categories.length} non-flags categories`);
+
+  for (const category of categories) {
+    // must remove game_question references before deleting questions (FK RESTRICT)
+    await prisma.gameQuestion.deleteMany({ where: { categoryId: category.id } });
+    await prisma.question.deleteMany({ where: { categoryId: category.id } });
+
+    const rows: { categoryId: string; text: string; answer: string; points: number }[] = [];
+
+    for (const { points, label } of DIFFICULTIES) {
+      for (let i = 1; i <= QUESTIONS_PER_DIFFICULTY; i++) {
+        rows.push({
+          categoryId: category.id,
+          text: `[${label} #${i}] ${category.name} — question ${i}`,
+          answer: `[${label} #${i}] ${category.name} — answer ${i}`,
+          points,
+        });
+      }
+    }
+
+    await prisma.question.createMany({ data: rows });
+
+    console.log(
+      `✅ "${category.name}" — ${rows.length} questions (${QUESTIONS_PER_DIFFICULTY}×200 / ${QUESTIONS_PER_DIFFICULTY}×400 / ${QUESTIONS_PER_DIFFICULTY}×600)`,
+    );
+  }
+}
+
+async function main() {
+  await seedFlags();
+  await seedAllCategories();
+  console.log('\n✅ Seeding completed!');
 }
 
 main()

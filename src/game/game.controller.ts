@@ -30,8 +30,13 @@ export class GameController {
 
   @UseGuards(SuperGuard)
   @Get('questions')
-  async findAllQuestions(@Req() req, @Query() query: { categoryId: string }) {
-    return await this.gameService.findAllQuestions(query.categoryId);
+  async findAllQuestions(
+    @Req() req,
+    @Query() query: { categoryId: string; page?: string; limit?: string; search?: string },
+  ) {
+    const page = parseInt(query.page) || 1;
+    const limit = parseInt(query.limit) || 10;
+    return await this.gameService.findAllQuestions(query.categoryId, page, limit, query.search);
   }
 
   @UseGuards(SuperGuard)

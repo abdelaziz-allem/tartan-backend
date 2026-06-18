@@ -26,12 +26,30 @@ export class GameService {
     });
   }
 
-  async findAllQuestions(categoryId: string): Promise<any[]> {
-    return await this.prisma.question.findMany({
-      where: {
-        categoryId,
-      },
-    });
+  async findAllQuestions(
+    categoryId: string,
+    page: number = 1,
+    limit: number = 10,
+    search?: string,
+  ): Promise<{ data: any[]; total: number; page: number; totalPages: number }> {
+    const skip = (page - 1) * limit;
+    const where: any = { categoryId };
+
+    if (search) {
+      where.text = { contains: search, mode: 'insensitive' };
+    }
+
+    const [data, total] = await Promise.all([
+      this.prisma.question.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: { points: 'asc' },
+      }),
+      this.prisma.question.count({ where }),
+    ]);
+
+    return { data, total, page, totalPages: Math.ceil(total / limit) };
   }
 
   async findGame(id: string): Promise<any[]> {
