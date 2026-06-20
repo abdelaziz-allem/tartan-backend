@@ -6,6 +6,64 @@ import { Game, Team } from '@prisma/client';
 export class GameService {
   constructor(private readonly prisma: PrismaService) {}
 
+  async getAnalytics() {
+    const [
+      totalUsers,
+      totalGames,
+      totalQuestions,
+      totalCategories,
+      gamesFinished,
+      categoryUsage,
+      recentGames,
+    ] = await Promise.all([
+      this.prisma.user.count(),
+      this.prisma.game.count(),
+      this.prisma.question.count(),
+      this.prisma.category.count(),
+      this.prisma.game.count({ where: { isFinished: true } }),
+      this.prisma.gameQuestion.groupBy({
+        by: ['categoryId'],
+        _count: { id: true },
+        orderBy: { _count: { id: 'desc' } },
+      }),
+      this.prisma.game.findMany({
+        take: 7,
+        orderBy: { createdAt: 'desc' },
+        include: {
+          teams: { orderBy: { position: 'asc' } },
+          _count: { select: { gameQuestions: true } },
+        },
+      }),
+    ]);
+
+    const categoryIds = categoryUsage.map((c) => c.categoryId);
+    const categories = await this.prisma.category.findMany({
+      where: { id: { in: categoryIds } },
+    });
+    const categoryMap = new Map(categories.map((c) => [c.id, c.name]));
+
+    return {
+      totalUsers,
+      totalGames,
+      totalQuestions,
+      totalCategories,
+      gamesFinished,
+      gamesInProgress: totalGames - gamesFinished,
+      categoryUsage: categoryUsage.map((c) => ({
+        name: categoryMap.get(c.categoryId) || c.categoryId,
+        count: c._count.id,
+      })),
+      recentGames: recentGames.map((g) => ({
+        id: g.id,
+        name: g.name,
+        isFinished: g.isFinished,
+        createdAt: g.createdAt,
+        teams: g.teams.map((t) => ({ name: t.name, score: t.score })),
+        totalQuestions: g._count.gameQuestions,
+      })),
+    };
+  }
+
   async findMyGames(userId: string): Promise<any[]> {
     return await this.prisma.game.findMany({
       where: {
@@ -75,6 +133,39 @@ export class GameService {
     }
   }
 
+  async switchTurn(gameId: string): Promise<{ status: number }> {
+    const game = await this.prisma.game.findUnique({
+      where: { id: gameId },
+      include: { teams: { orderBy: { position: 'asc' } } },
+    });
+    if (!game) throw new NotFoundException('Game not found');
+
+    const next =
+      game.teams[0].id === game.currentTurn
+        ? game.teams[1].id
+        : game.teams[0].id;
+
+    await this.prisma.game.update({
+      where: { id: gameId },
+      data: { currentTurn: next },
+    });
+    return { status: 200 };
+  }
+
+  async incrementTeamScore({
+    teamId,
+    amount,
+  }: {
+    teamId: string;
+    amount: 100 | -100;
+  }): Promise<{ status: number }> {
+    await this.prisma.team.update({
+      where: { id: teamId },
+      data: { score: { increment: amount } },
+    });
+    return { status: 201 };
+  }
+
   async findTeams(gameId: string): Promise<Team[]> {
     try {
       return await this.prisma.team.findMany({
@@ -98,6 +189,28 @@ export class GameService {
       data,
     });
     return { status: 201 };
+  }
+
+  async updateQuestion(
+    id: string,
+    data: {
+      text?: string;
+      answer?: string;
+      points?: number;
+      fileUrl?: string;
+      fileType?: string;
+      answerFileUrl?: string;
+      answerFileType?: string;
+    },
+  ): Promise<{ status: number }> {
+    const question = await this.prisma.question.findUnique({ where: { id } });
+    if (!question) throw new NotFoundException('Question not found');
+
+    await this.prisma.question.update({
+      where: { id },
+      data,
+    });
+    return { status: 200 };
   }
 
   async createQuestion(data: {
