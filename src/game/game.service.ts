@@ -181,6 +181,20 @@ export class GameService {
     }
   }
 
+  async updateCategory(
+    id: string,
+    data: { name?: string; imageUrl?: string },
+  ): Promise<{ status: number }> {
+    const category = await this.prisma.category.findUnique({ where: { id } });
+    if (!category) throw new NotFoundException('Category not found');
+
+    await this.prisma.category.update({
+      where: { id },
+      data,
+    });
+    return { status: 200 };
+  }
+
   async createCategory(data: {
     name: string;
     imageUrl: string;

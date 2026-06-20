@@ -1,44 +1,38 @@
 import { PrismaClient } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { Pool } from 'pg';
-import * as fs from 'fs';
-import * as path from 'path';
+import { hollywoodQuestions } from './hollywood';
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
 
-interface GeneralQuestion {
-  text: string;
-  answer: string;
-  points: number;
-}
+const HOLLYWOOD_CATEGORY_ID = 'bc21f965-46b6-4e44-b191-247590a79922';
 
 async function main() {
-  const generalCategoryId = '67c7b354-4b14-4be7-af90-819e8f024b4e';
+  console.log(`Seeding ${hollywoodQuestions.length} Hollywood questions...`);
 
-  const raw = fs.readFileSync(path.join(__dirname, 'general.json'), 'utf-8');
-  const questions: GeneralQuestion[] = JSON.parse(raw);
-
-  console.log(`📦 Seeding ${questions.length} general questions...`);
-
-  for (const q of questions) {
+  for (const q of hollywoodQuestions) {
     await prisma.question.create({
       data: {
-        categoryId: generalCategoryId,
+        categoryId: HOLLYWOOD_CATEGORY_ID,
         text: q.text,
         answer: q.answer,
         points: q.points,
+        fileUrl: q.fileUrl,
+        fileType: q.fileType,
+        answerFileUrl: q.answerFileUrl,
+        answerFileType: q.answerFileType,
       },
     });
   }
 
-  console.log('\n✅ Seeding completed!');
+  console.log('Seeding completed!');
 }
 
 main()
   .catch((e) => {
-    console.error('❌ Error seeding data:', e);
+    console.error('Error seeding data:', e);
     process.exit(1);
   })
   .finally(async () => {

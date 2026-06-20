@@ -29,6 +29,15 @@ export class GameController {
     return await this.gameService.createCategory(body);
   }
 
+  @UseGuards(SuperGuard)
+  @Patch('category/:id')
+  async updateCategory(
+    @Param('id') id: string,
+    @Body() body: { name?: string; imageUrl?: string },
+  ) {
+    return await this.gameService.updateCategory(id, body);
+  }
+
   // ─── Questions ───────────────────────────────────────────────────────────
 
   @UseGuards(SuperGuard)
