@@ -12,6 +12,7 @@ import { CronModule } from './cron/cron.module';
 
 import { NotificationModule } from './notification/notification.module';
 import { GameModule } from './game/game.module';
+import { SuggestionModule } from './suggestion/suggestion.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { GameModule } from './game/game.module';
     GameModule,
     CronjobModule.forRoot(),
     CronModule,
+    SuggestionModule,
   ],
 })
 export class AppModule {}

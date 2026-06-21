@@ -15,6 +15,7 @@ model User {
   role Role
   games              Game[]
   notifications notification[]
+  suggestions Suggestion[]
 
   @@index([id])
   @@map("user")
@@ -112,9 +113,36 @@ model GameQuestion {
   category    Category  @relation(fields: [categoryId], references: [id])
   question    Question  @relation(fields: [questionId], references: [id])
   team        Team?     @relation("TeamAnswers", fields: [answeredBy], references: [id])
+  suggestions  Suggestion[]
   @@map("game_question")
 }
 
+
+model Suggestion {
+  id             String           @id @default(cuid())
+  userId         String
+  type           SuggestionType
+  message        String           @db.Text
+  status         SuggestionStatus @default(Pending)
+  gameQuestionId String?
+  gameQuestion   GameQuestion?    @relation(fields: [gameQuestionId], references: [id])
+  user           User   @relation(fields: [userId], references: [id])
+  createdAt      DateTime         @default(now())
+
+  @@map("suggestion")
+}
+
+enum SuggestionType {
+  Complaint
+  Category_Request
+  Other
+  
+}
+
+enum SuggestionStatus {
+  Pending
+  Resolved
+}
 
 
 
